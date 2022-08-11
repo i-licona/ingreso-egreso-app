@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { AppState } from '../app.reducer';
+import { setUser, unSetUser } from '../auth/auth.actions';
 import { Usuario,FbUser } from '../models/user.model';
 
 @Injectable({
@@ -9,15 +13,25 @@ import { Usuario,FbUser } from '../models/user.model';
 })
 export class AuthService {
 
+  userSubscription:Subscription;
+
   constructor(
     public auth:AngularFireAuth,
-    private firestore:AngularFirestore
+    private firestore:AngularFirestore,
+    private store:Store<AppState>
     ) { }
 
   initAuthListener(){
     this.auth.authState.subscribe(user =>{
-      console.log(user?.email);
-      console.log(user?.uid);
+      if (user) {
+        this.userSubscription = this.firestore.doc(`${user.uid}/user`).valueChanges().subscribe(fsUser =>{
+          const user:FbUser = fsUser;
+          this.store.dispatch(setUser({user:user}));
+        });
+      } else{
+        this.userSubscription.unsubscribe();
+        this.store.dispatch(unSetUser());
+      }
     });
   }
 
