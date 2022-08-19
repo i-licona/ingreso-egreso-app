@@ -13,8 +13,8 @@ import { Usuario,FbUser } from '../models/user.model';
 })
 export class AuthService {
 
-  userSubscription:Subscription;
-
+  public userSubscription:Subscription;
+  private _user:FbUser;
   constructor(
     public auth:AngularFireAuth,
     private firestore:AngularFirestore,
@@ -26,9 +26,11 @@ export class AuthService {
       if (user) {
         this.userSubscription = this.firestore.doc(`${user.uid}/user`).valueChanges().subscribe(fsUser =>{
           const user:FbUser = fsUser;
+          this._user = user;
           this.store.dispatch(setUser({user:user}));
         });
       } else{
+        this._user = null;
         this.userSubscription.unsubscribe();
         this.store.dispatch(unSetUser());
       }
@@ -58,5 +60,8 @@ export class AuthService {
 
   isAuth(){
     return this.auth.authState.pipe(map( user => user != null ));
+  }
+  get user(){
+    return { ...this._user};
   }
 }
