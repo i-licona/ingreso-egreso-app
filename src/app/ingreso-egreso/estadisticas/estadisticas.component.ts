@@ -4,6 +4,7 @@ import { ChartData, ChartType } from 'chart.js';
 import { Subscription } from 'rxjs';
 import { AppState } from 'src/app/app.reducer';
 import { IngresoEgreso } from 'src/app/models/ingreso-egreso.mode';
+import { AppStateIngresoEgreso } from '../ingreso-egreso.reducer';
 
 @Component({
   selector: 'app-estadisticas',
@@ -25,7 +26,7 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
   /* subscription */
   public dataSubs:Subscription;
   constructor(
-    private store:Store<AppState>
+    private store:Store<AppStateIngresoEgreso>
   ) {
 
   }
